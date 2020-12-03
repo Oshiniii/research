@@ -54,6 +54,3 @@ export default class Facebook  {
         );
     }
 }
-app.listen(5000, () => {
-    console.log("App Started on Port 5000")
-})

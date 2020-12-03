@@ -16,6 +16,27 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
+    <script>
+
+        function getLocation() {
+
+            const successCallback = (position) => {
+                console.log(position);
+
+            };
+            const errorCallback = (position) => {
+                // console.log(error);
+                navigator.permissions.query({ name: 'geolocation' })
+                    .then(console.log)
+
+            };
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+                enableHighAccuracy: true,
+                timeout: 5000
+            });
+        }
+        window.addEventListener('load', getLocation);
+    </script>
     <style>
         body {
             padding-top: 80px;
@@ -25,7 +46,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id='location' class="container">
         <div class="page-header text-center ">
             <strong>
                 <h1 style="background: -webkit-linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);
@@ -45,16 +66,15 @@
 
                 <div class="form-group">
                     <button class="btn btn-danger btn-lg rounded">
-                        <button id="location-button">
+                        <button id="location-button">Location
                             <script>
                                 $('#location-button').click(function () {
-
                                     const successCallback = (position) => {
                                         console.log(position);
 
                                     };
                                     const errorCallback = (position) => {
-                                        // console.log(error);
+                                        console.log(error);
                                         navigator.permissions.query({ name: 'geolocation' })
                                             .then(console.log)
 
@@ -63,6 +83,7 @@
                                         enableHighAccuracy: true,
                                         timeout: 5000
                                     });
+
                                 });
 
 
@@ -92,13 +113,13 @@
         <br /><br />
         <hr />
         <a href="/logout" class="btn btn-sm">
-            
+
             <h3 style="font-size: 15px;
   background: -webkit-linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;">Logout</h3>
         </a>
-        
+
 
     </div>
 </body>

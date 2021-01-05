@@ -4,10 +4,107 @@ const OAuth2Data = require("./credentials.json")
 const multer = require("multer")
 const fs = require("fs")
 const { script } = require('googleapis/build/src/apis/script')
+const { time } = require('console')
+const Speakeasy = require("speakeasy")
+const BodyParser = require("body-parser")
+const { request, response } = require('express')
 
+const bodyParser = require('body-parser');
+const {JsonDB }= require('node-json-db')
+const {Config}= require('node-json-db/dist/lib/JsonDBConfig')
+const uuid = require("uuid");
+const speakeasy = require("speakeasy")
 
 
 const app = express()
+
+//two factor authentication
+app.use(express.json())
+const dbConfig = new Config("myDataBase", true, false, '/')
+
+const db = new JsonDB(dbConfig);
+
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.get("/api", (req,res) => {
+  res.json({ message: "Welcome to the two factor authentication exmaple" })
+});
+
+
+//register and create temp secret 
+app.post('/api/register', (req, res) => {
+    const id = uuid.v4();
+    try {
+      const path = `/user/${id}`;
+      // Create temporary secret until it it verified
+      const temp_secret = speakeasy.generateSecret()
+      // Create user in the database
+      db.push(path, { id, temp_secret });
+      // Send user id and base32 key to user
+      res.json({ id, secret: temp_secret.base32})
+    } catch(error) {
+      console.log(error);
+      res.status(500).json({ message: 'Error generating secret key'})
+    }
+  })
+  
+  app.post("/api/verify", (req,res) => {
+    const { userId, token } = req.body;
+    try {
+      // Retrieve user from database
+      const path = `/user/${userId}`;
+      const user = db.getData(path);
+      
+      const { base32: secret } = user.temp_secret;
+      const verified = speakeasy.totp.verify({
+        secret,
+        encoding: 'base32',
+        token
+      });
+      if (verified) {
+        // Update user data
+        db.push(path, { id: userId, secret: user.temp_secret });
+        res.json({ verified: true })
+      } else {
+        res.json({ verified: false})
+      }
+    } catch(error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error retrieving user'})
+    };
+  })
+
+
+// //used for two factor authentication
+// app.use(BodyParser.json());
+// app.use(BodyParser.urlencoded({ extended:true}));
+
+// app.post("/totp-secret",(request, response, next) => {
+//     var secret = Speakeasy.generateSecret({length:20});
+//     response.send({"secret": secret.base32});
+// });
+
+// app.post("/totp-generate",(request,response,next) =>{
+//     response.send({
+//         "token": Speakeasy.totp({
+//             secret:request.body.secret,
+//             encoding:"base32"
+//         }),
+//         "remaining":(30 - Math.floor((new Date().getTime() / 1000.00 % 30)))
+//     });
+// });
+
+// app.post("/totp-validate",(request,response,next) =>{
+//     response.send({
+//         "valid":Speakeasy.totp.verify({
+//             secret:request.body.secret,
+//             encoding:"base32",  
+//             token:request.body.token,
+//             window:1
+//         })
+//     })
+// })
+ 
 
 const CLIENT_ID = OAuth2Data.web.client_id
 const CLIENT_SECRET = OAuth2Data.web.client_secret
@@ -51,6 +148,7 @@ app.get("/", (req, res) => {
             name = response.data.name
             photo = response.data.picture
 
+
             res.render("success", { name: name, photo: photo, success: false })
         })
     }
@@ -80,43 +178,27 @@ app.get('/google/callback', (req, res) => {
     }
 })
 
+// let btnShow = document.querySelector('button')
 
-// app.post('/upload', (req, res) => {
-//     upload(req, res, function(err) {
-//         if(err) {
-//             console.log(err)
-//         }
-//         // console.log(req.file.path)
-//         const drive = google.drive({
-//             version: 'v3',
-//             auth: oAuth2Client
-//         })
+// btnShow.addEventListener('click',()=>{
+//     let today = new Date();
+//     let month = today.getMonth()+1;
+//     let year = today.getFullYear();
+//     let date = today.getDate();
 
-//         const filemetadata = {
-//             name: req.file.filename
-//         }
+//     let current_date =`${month}/${date}/${year}`;
+//     let hours = addZero(today.getHours());
+//     let minutes = addZero(today.getMinutes());
+//     let seconds = addZero(today.getSeconds());
 
-//         const media = {
-//             mimeType: req.file.mimetype,
-//             body: fs.createReadStream(req.file.path)
-//         }
+//     let current_time =`${hours}:${minutes}:${seconds}`;
+//     console.log(current_time);
+// });
 
-//         drive.files.create({
-//             resource: filemetadata,
-//             media: media,
-//             fields: "id"
-//         }, (err, file) => {
-//             if(err) {
-//                 console.log(err)
-//             }
-//             console.log('SUCCESS!');
-//             fs.unlinkSync(req.file.path);
-//             res.render('success', {name:name, photo:photo, success:true})
-//             success = true;
-//             // res.redirect('/')
-//         })
-//     })
-// })
+// function addZero(num){
+//     return num<10?`0${num}`:num;
+// }
+
 
 app.get('/logout', (req, res) => {
     authed = false

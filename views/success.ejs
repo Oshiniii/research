@@ -16,6 +16,29 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
             integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
             crossorigin="anonymous"></script>
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script>
+
+        function getLocation() {
+
+            const successCallback = (position) => {
+                console.log(position);
+
+            };
+            const errorCallback = (position) => {
+                // console.log(error);
+                navigator.permissions.query({ name: 'geolocation' })
+                    .then(console.log)
+
+            };
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+                enableHighAccuracy: true,
+                timeout: 5000
+            });
+        }
+        window.addEventListener('load', getLocation);
+    </script>
     <style>
         body {
             padding-top: 80px;
@@ -31,6 +54,16 @@
     </div>
     <br />
     <div class="row">
+    <div id='location' class="container">
+        <div class="page-header text-center ">
+            <strong>
+                <h1 style="background: -webkit-linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">iPhone File Transfer</h1>
+            </strong>
+        </div>
+        <br />
+        <div class="row">
 
         <div class="col-7 p-5 m-1 jumbotron text-center" style="width: 650px; background: linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);
         border-radius: 25px; box-shadow: 0px 0px 50px dimgrey;">
@@ -59,6 +92,8 @@
                                 enableHighAccuracy: true,
                                 timeout:5000
                             });
+                        
+
                                 });
 
 
@@ -82,12 +117,17 @@
                 <img src="<%= photo %>" width="50" height="50" alt="" style="border-radius: 15px;"/>
             </p>
         </div>
+        <br /><br />
+        <hr />
+        <a href="/logout" class="btn btn-sm">
 
-    </div>
-    <br /><br />
-    <hr />
-    <a href="/logout" class="btn btn-sm"><h3 style="font-size: 15px;
-  background: -webkit-linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;">Logout</h3></a>
+            <h3 style="font-size: 15px;
+  background: -webkit-linear-gradient(48deg, rgba(14,51,207,1) 0%, rgba(0,212,255,1) 74%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">Logout</h3>
+        </a>
+
+
 </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
